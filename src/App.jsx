@@ -7,6 +7,7 @@ import LoadingOverlay from './components/LoadingOverlay'
 import StepIndicator from './components/StepIndicator'
 import EditingStep from './components/EditingStep'
 import BackgroundRemoverTool from './components/BackgroundRemoverTool'
+import SpritesheetComposer from './components/SpritesheetComposer'
 import { extractFramesFromVideo } from './utils/ffmpeg'
 import { extractFramesFromGif } from './utils/gifExtractor'
 import { generateSpriteSheet, downloadBlob } from './utils/spriteGenerator'
@@ -16,7 +17,7 @@ import { flipFramesHorizontal } from './utils/imageTransform'
 import { saveProject, loadProject, isFileSystemAccessSupported } from './utils/projectStorage'
 
 function App() {
-  // Tool selection (null = selector, 'sprite' = sprite maker, 'bgremover' = background remover)
+  // Tool selection (null = selector, 'sprite' = sprite maker, 'bgremover' = background remover, 'composer' = spritesheet composer)
   const [currentTool, setCurrentTool] = useState(null)
 
   // Step state (1=upload, 2=selection, 3=editing, 4=export)
@@ -345,6 +346,8 @@ function App() {
                 ? 'Create sprite sheet from video or GIF'
                 : currentTool === 'bgremover'
                 ? 'Remove background from image using AI'
+                : currentTool === 'composer'
+                ? 'Compose and arrange sprites on a canvas'
                 : 'Tools for working with images and animations'}
             </p>
           </div>
@@ -394,12 +397,23 @@ function App() {
               <h3>Background Remover</h3>
               <p>Remove background from image using AI. Supports PNG, JPG, WEBP and other formats.</p>
             </div>
+
+            <div className="tool-card" onClick={() => setCurrentTool('composer')}>
+              <div className="tool-icon">🧩</div>
+              <h3>Spritesheet Composer</h3>
+              <p>Create and edit spritesheets by importing images, slicing sheets, and arranging sprites on a canvas.</p>
+            </div>
           </div>
         )}
 
         {/* Background Remover Tool */}
         {currentTool === 'bgremover' && (
           <BackgroundRemoverTool onBack={() => setCurrentTool(null)} />
+        )}
+
+        {/* Spritesheet Composer */}
+        {currentTool === 'composer' && (
+          <SpritesheetComposer onBack={() => setCurrentTool(null)} />
         )}
 
         {/* Sprite Maker - Step 1: Upload */}
@@ -486,6 +500,7 @@ function App() {
                   frameCount={selectedFrames.length}
                   originalWidth={originalDimensions.width}
                   originalHeight={originalDimensions.height}
+                  frames={selectedFrames}
                   settings={settings}
                   onSettingsChange={setSettings}
                   onExport={handleExport}
